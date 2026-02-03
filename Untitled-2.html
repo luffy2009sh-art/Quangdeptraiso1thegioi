@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xác Suất Xanh - FarmMath Adventure</title>
+<style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #e8f5e9;
+  margin: 0;
+  padding: 0;
+}
+header {
+  background-color: #4caf50;
+  color: white;
+  text-align: center;
+  padding: 20px;
+  font-size: 28px;
+  font-weight: bold;
+}
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 20px;
+}
+.farm-section, .quiz-section {
+  width: 48%;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  padding: 20px;
+}
+.farm-section h2, .quiz-section h2 {
+  color: #2e7d32;
+}
+.progress-bar {
+  width: 100%;
+  background-color: #c8e6c9;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+.progress {
+  height: 20px;
+  width: 0%;
+  background-color: #66bb6a;
+  transition: width 0.5s;
+}
+button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+button:hover {
+  background-color: #388e3c;
+}
+.question {
+  margin-bottom: 20px;
+}
+.option {
+  display: block;
+  margin: 5px 0;
+}
+.reward-box {
+  background-color: #f1f8e9;
+  border: 1px solid #c5e1a5;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+</style>
+</head>
+<body>
+
+<header>🌾 Xác Suất Xanh - FarmMath Adventure 🌾</header>
+
+<div class="container">
+  <div class="farm-section">
+    <h2>🌱 Nông Trại Của Bạn</h2>
+    <p>Trồng cây, nuôi thú và phát triển nông trại bằng cách trả lời đúng các câu hỏi xác suất!</p>
+    <div class="reward-box">
+      <p><strong>Xu:</strong> <span id="coins">0</span></p>
+      <p><strong>Kinh nghiệm:</strong> <span id="xp">0</span></p>
+      <p><strong>Tiến độ mùa vụ:</strong></p>
+      <div class="progress-bar"><div class="progress" id="progress"></div></div>
+    </div>
+    <p><strong>Phần thưởng:</strong></p>
+    <ul>
+      <li>3 câu đúng: Mở khóa công cụ mới</li>
+      <li>6 câu đúng: Mở khóa giống cây mới</li>
+      <li>9 câu đúng: Mở khóa vật nuôi mới</li>
+      <li>12 câu đúng: Huy hiệu “Nhà Toán Học Nông Dân”</li>
+    </ul>
+  </div>
+
+  <div class="quiz-section">
+    <h2>🧮 Câu Hỏi Xác Suất</h2>
+    <div id="quiz-container">
+      <div class="question" id="question-text">Câu hỏi sẽ hiển thị tại đây</div>
+      <div id="options"></div>
+      <button onclick="nextQuestion()">Trả lời</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {q: "Một hộp có 5 bi xanh, 3 bi đỏ. Xác suất lấy được bi xanh là?", options: ["3/8", "5/8", "1/2", "2/5"], correct: 1},
+  {q: "Gieo một con xúc xắc. Xác suất ra mặt chẵn là?", options: ["1/6", "1/3", "1/2", "2/3"], correct: 2},
+  {q: "Tung đồng xu 2 lần. Xác suất được ít nhất một mặt sấp là?", options: ["1/4", "1/2", "3/4", "2/3"], correct: 2},
+  {q: "Chọn 2 học sinh từ lớp có 20 nam, 15 nữ. Xác suất chọn 1 nam 1 nữ?", options: ["20/119", "48/119", "12/35", "15/34"], correct: 1},
+  {q: "Hai xạ thủ có xác suất trúng 0.8 và 0.7. Xác suất đúng 1 người trúng?", options: ["0.24", "0.38", "0.56", "0.94"], correct: 1},
+  {q: "Hộp có 10 sản phẩm, 3 phế phẩm. Xác suất lấy 2 sản phẩm tốt?", options: ["7/15", "1/3", "7/30", "21/45"], correct: 0},
+  {q: "Máy có 3 bộ phận, mỗi bộ phận hỏng 0.1. Xác suất máy hoạt động tốt?", options: ["0.729", "0.9", "0.99", "0.999"], correct: 0},
+  {q: "Tỷ lệ nảy mầm 0.8, gieo 5 hạt. Xác suất có đúng 3 hạt nảy mầm?", options: ["0.2048", "0.4096", "0.0512", "0.2048"], correct: 0},
+  {q: "Hai hộp bi: (4 trắng,6 đen) và (3 trắng,7 đen). Xác suất lấy 2 bi cùng màu?", options: ["0.54", "0.46", "0.24", "0.76"], correct: 0},
+  {q: "Xạ thủ bắn 3 phát, xác suất trúng 0.6. Xác suất ít nhất 2 phát trúng?", options: ["0.648", "0.352", "0.288", "0.432"], correct: 0},
+  {q: "60% giỏi Toán, 50% giỏi Văn, 30% cả hai. Xác suất giỏi Văn khi giỏi Toán?", options: ["0.3", "0.5", "0.6", "0.8"], correct: 1},
+  {q: "An đỗ 0.8, Bình đỗ 0.7, ít nhất 1 người đỗ 0.9. Xác suất cả hai cùng đỗ?", options: ["0.56", "0.6", "0.72", "0.14"], correct: 1}
+];
+
+let current = 0;
+let coins = 0;
+let xp = 0;
+let correctCount = 0;
+
+function loadQuestion() {
+  const q = questions[current];
+  document.getElementById("question-text").innerText = "Câu " + (current + 1) + ": " + q.q;
+  const optionsDiv = document.getElementById("options");
+  optionsDiv.innerHTML = "";
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement("input");
+    btn.type = "radio";
+    btn.name = "option";
+    btn.value = i;
+    btn.classList.add("option");
+    optionsDiv.appendChild(btn);
+    optionsDiv.innerHTML += " " + opt + "<br>";
+  });
+}
+
+function nextQuestion() {
+  const selected = document.querySelector('input[name="option"]:checked');
+  if (!selected) return;
+  const answer = parseInt(selected.value);
+  if (answer === questions[current].correct) {
+    coins += 10;
+    xp += 5;
+    correctCount++;
+  }
+  current++;
+  document.getElementById("coins").innerText = coins;
+  document.getElementById("xp").innerText = xp;
+  document.getElementById("progress").style.width = (current / questions.length * 100) + "%";
+  if (current < questions.length) {
+    loadQuestion();
+  } else {
+    document.getElementById("quiz-container").innerHTML = "<h3>🎉 Hoàn thành! Bạn trả lời đúng " + correctCount + "/12 câu!</h3>";
+  }
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
